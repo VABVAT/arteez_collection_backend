@@ -11,6 +11,14 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
     const { name, email, phone, address, password } = req.body;
     try {
+        const existingUser = await prisma.user.findUnique({
+            where: { phone },
+        });
+
+        if (existingUser) {
+            return res.status(400).json({ error: "User with this phone number already exists" });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await prisma.user.create({
             data: {
@@ -21,7 +29,9 @@ router.post("/register", async (req, res) => {
                 password: hashedPassword,
             },
         });
-        res.json(user);
+
+        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
+        res.json({ token });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Failed to create user" });
@@ -47,7 +57,8 @@ router.post("/login", async (req, res) => {
         }
 
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
-        res.json({ token });
+        const jbody = user.role === "ADMIN" ? {token, role: user.role} : {token};
+        res.json(jbody);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Failed to login" });
@@ -68,6 +79,7 @@ router.get("/users/me", authenticateJWT, async (req, res) => {
                 email: true,
                 phone: true,
                 address: true,
+                role: true,
             },
         });
         res.json(user);
