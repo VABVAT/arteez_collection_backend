@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model dresses {
+  id             Int          @id @default(autoincrement())
+  name           String       @db.VarChar(255)
+  price          Int
+  original_price Int?
+  rating         Int?
+  reviews        Int?
+  image          String?
+  description    String?
+  quantity       Int?         @default(0)
+  sizes          dress_size[]
+  orders         OrderDresses[]
+}
+
+enum dress_size {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id       String  @id @default(cuid())
+  name     String
+  email    String
+  phone    String  @unique
+  address  String
+  password String
+  role     Role    @default(USER)
+  orders   Order[]
+}
+
+model Order {
+  id                String       @id @default(cuid())
+  razorpayOrderId   String       @unique
+  status            String
+  amount            Int
+  currency          String
+  addressTo         String?
+  delivered         Boolean      @default(false)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  completedAt       DateTime?
+  userId            String
+  user              User         @relation(fields: [userId], references: [id])
+  dresses           OrderDresses[]
+  payment           Payment?
+}
+
+model OrderDresses {
+  id        Int        @id @default(autoincrement())
+  order     Order      @relation(fields: [orderId], references: [id])
+  orderId   String
+  dress     dresses    @relation(fields: [dressId], references: [id])
+  dressId   Int
+  size      dress_size
+}
+
+model Payment {
+  id                String   @id @default(cuid())
+  razorpayPaymentId String   @unique
+  razorpaySignature String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  orderId           String   @unique
+  order             Order    @relation(fields: [orderId], references: [id])
+}
