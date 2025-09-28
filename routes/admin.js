@@ -132,26 +132,25 @@ router.post("/dresses", authenticateJWT, isAdmin, async (req, res) => {
 // PUT edit an existing dress
 router.put("/dresses/:id", authenticateJWT, isAdmin, async (req, res) => {
     const { id } = req.params;
-    let { name, price, original_price, rating, reviews, image, description, quantity, sizes } = req.body;
-    original_price = parseInt(original_price);
-    price = parseInt(price);
-    quantity = parseInt(quantity);
+    const { name, price, original_price, rating, reviews, image, description, quantity, sizes } = req.body;
+
+    const dataToUpdate = {};
+    if (name) dataToUpdate.name = name;
+    if (price) dataToUpdate.price = parseInt(price);
+    if (original_price) dataToUpdate.original_price = parseInt(original_price);
+    if (rating) dataToUpdate.rating = rating;
+    if (reviews) dataToUpdate.reviews = reviews;
+    if (image) dataToUpdate.image = image;
+    if (description) dataToUpdate.description = description;
+    if (quantity) dataToUpdate.quantity = parseInt(quantity);
+    if (sizes) dataToUpdate.sizes = { set: sizes };
+
     try {
         const dress = await prisma.dresses.update({
             where: {
                 id: parseInt(id),
             },
-            data: {
-                name,
-                price,
-                original_price,
-                rating,
-                reviews,
-                image,
-                description,
-                quantity,
-                sizes,
-            },
+            data: dataToUpdate,
         });
         res.json(dress);
     } catch (err) {
