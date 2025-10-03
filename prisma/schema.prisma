@@ -68,13 +68,12 @@ model Order {
 }
 
 model OrderDresses {
-  id        Int        @id @default(autoincrement())
-  order     Order      @relation(fields: [orderId], references: [id])
-  orderId   String
-  dressId   Int
-  size      dress_size
-  dresses   dresses?   @relation(fields: [dressesId], references: [id])
-  dressesId Int?
+  id      Int        @id @default(autoincrement())
+  order   Order      @relation(fields: [orderId], references: [id])
+  orderId String
+  dress   dresses    @relation(fields: [dressId], references: [id], onDelete: Cascade)
+  dressId Int
+  size    dress_size
 }
 
 model Payment {
