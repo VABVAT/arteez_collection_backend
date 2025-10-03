@@ -9,15 +9,15 @@ datasource db {
 }
 
 model dresses {
-  id             Int          @id @default(autoincrement())
-  name           String       @db.VarChar(255)
+  id             Int            @id @default(autoincrement())
+  name           String         @db.VarChar(255)
   price          Int
   original_price Int?
   rating         Int?
   reviews        Int?
   image          String?
   description    String?
-  quantity       Int?         @default(0)
+  quantity       Int?           @default(0)
   sizes          dress_size[]
   orders         OrderDresses[]
 }
@@ -51,29 +51,30 @@ model User {
 }
 
 model Order {
-  id                String       @id @default(cuid())
-  razorpayOrderId   String       @unique
-  status            String
-  amount            Int
-  currency          String
-  addressTo         String?
-  delivered         Boolean      @default(false)
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  completedAt       DateTime?
-  userId            String
-  user              User         @relation(fields: [userId], references: [id])
-  dresses           OrderDresses[]
-  payment           Payment?
+  id              String         @id @default(cuid())
+  razorpayOrderId String         @unique
+  status          String
+  amount          Int
+  currency        String
+  addressTo       String?
+  delivered       Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  completedAt     DateTime?
+  userId          String
+  user            User           @relation(fields: [userId], references: [id])
+  dresses         OrderDresses[]
+  payment         Payment?
 }
 
 model OrderDresses {
   id        Int        @id @default(autoincrement())
   order     Order      @relation(fields: [orderId], references: [id])
   orderId   String
-  dress     dresses    @relation(fields: [dressId], references: [id])
   dressId   Int
   size      dress_size
+  dresses   dresses?   @relation(fields: [dressesId], references: [id])
+  dressesId Int?
 }
 
 model Payment {
